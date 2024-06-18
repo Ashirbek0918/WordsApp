@@ -14,7 +14,8 @@ class WordsCheckController extends Controller
         $user = User::findOrFail(auth()->user()->id);
         $data = $request->validated();
         $checkedwords = $user->checkedwords()->where('unverified_id',$data['unverified_id'])->first();
-        if(Unverified::findOrFail($data['unverified_id'])->user_id == $user->id){
+        $unverified = Unverified::findOrFail($data['unverified_id']);
+        if($unverified->user_id == $user->id){
             return response()->json([
                'success' => false,
                'message' => 'You cannot check your own words'
@@ -26,6 +27,11 @@ class WordsCheckController extends Controller
                 'unverified_id' => $data['unverified_id'],
                 'type' => $data['type']
             ]);
+            if($unverified->checkedwords()->count() > 20){
+                $unverified->update([
+                    'type' => 'checked'
+                ]);
+            }
             return response()->json([
                 'success' => true,
                 'message' => 'Checked'

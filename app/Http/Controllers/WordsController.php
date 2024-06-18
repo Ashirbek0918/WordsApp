@@ -45,30 +45,48 @@ class WordsController extends Controller
     public function mywords()
     {
         $user = User::findOrFail(auth()->user()->id);
+        // return $user;
         return response()->json([
             'success' => true,
             'total' => $user->unverifiedwords()->count(),
-            'data' =>WordsResource::collection($user->unverifiedwords())
+            'data' =>WordsResource::collection($user->unverifiedwords)
         ]);
         
     }
 
-    public function delete(Unverified $unverified){
+    public function delete($id){
+        $unverified  = Unverified::findOrFail($id);
         if($unverified){
             $unverified->checkusers()->delete();
             $unverified->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Word deleted successfully'
+             ]);
         }
+        return response()->json([
+            'success' => false,
+           'message' => 'Word not found'
+        ],404);
+        
     }
 
-    public function update(UnverifiedUpdateRequest $request,Unverified $unverified){
+    public function update(UnverifiedUpdateRequest $request, $id){
         $user = User::findOrFail(auth()->user()->id);
         $data = $request->validated();
+        $unverified = Unverified::findOrFail($id);
         if($unverified && $user->id == $unverified->user_id){
-            $unverified->update([
-                'word' => $data['word']
-            ]);
+            if($request->has('word')){
+                $unverified->update([
+                    'word' => $data['word']
+                ]);
+            }
             return ResponseController::success('Successfully updated',200);
         }
+        return response()->json([
+           'success' => false,
+           'message' => 'Word not found'
+        ],404);
     }
 
     public function usersWithWords(){

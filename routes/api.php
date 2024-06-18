@@ -34,8 +34,8 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::get('words/unchecked',[WordsController::class,'uncheckedWords']);
     Route::get('words/mywords',[WordsController::class,'mywords']);
     Route::post('words/create',[WordsController::class,'create']);
-    Route::put('words/update/{word}',[WordsController::class,'update']);
-    Route::delete('words/delete/{word}',[WordsController::class,'delete']);
+    Route::put('words/update/{word}',[WordsController::class,'update'])->middleware('can:update-unverified-word,unverified');
+    Route::delete('words/delete/{id}',[WordsController::class,'delete'])->middleware('can:update-unverified-word,unverified');
     Route::get('users',[WordsController::class,'usersWithWords']);
 
     //words check routes
